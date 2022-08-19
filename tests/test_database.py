@@ -1,35 +1,51 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#----------------------------------------------------------------------------
+# Created By  : Nicolas Escobar
+# Created Date: 17/08/2022
+# version ='1.0'
+# ---------------------------------------------------------------------------
+""" Database related tests """
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 import unittest
-from bin.dbCon import *
-from settings import *
+from bin.dbCon import *  # DB connection
+from settings import *  # App Global info
 
 
 # class MyTestCase(unittest.TestCase):
 #     def test_something(self):
 #         self.assertEqual(True, False)  # add assertion here
 
-#Teste Banco de Dados
-if __name__ == '__main__':
-    # |✓| 1° Teste, criar conexão
-    con = create_con(HOST,USER,PASSWORD,NAME)
+if __name__ == '__main__':  # DB main testing
+    # |✓| 1st Test, create connection
+    con = create_con(HOST, USER, PASSWORD, NAME)
 
-    # |✓| 2° Teste, verifica conexão com o BD
-    if(con.is_connected()):
-        print("Conexão com sucesso")
+    # |✓| 2nd Test, verify DB connection
+    if not con.is_connected():
+        print("DB connection error!")
     else:
-        print("Falhou")
+        print("DB connection succeeded!")
 
-    # |✓| 3° Teste, cria usuários
-    # |✓| 5° Teste, evita duplicidade no banco e no SQL
-    create_user(con, 'pepito', 'pepo123')
+    # |✓| 3rd Test, user creation
     create_user(con, 'pepita', 'pepa123')
     create_user(con, 'pepite', 'pepe123')
     create_user(con, 'pepiti', 'pepi123')
-    create_user(con, 'pepitu', 'pepu123')
 
-    # |✓| 4° Teste, valida usuário criado no BD
-    if(verify_user(con, "pepito", "pepo123")):
-        print("Login com sucesso")
+    # |✓| 4th Test, verify created user
+    if not verify_user(con, "pepito"):
+        print("User not found!")
+    else:
+        print("User found!")
 
+    # |✓| 5th Test, avoid DB duplicates
+    create_user(con, 'pep1to', 'pepo123')
+    create_user(con, 'p3pito', 'pepo123')
 
-    # | | 6° Teste, deleta usuários
+    # |✓| 6th Test, remove users
+    delete_user(con, 'pepita')
+    delete_user(con, 'pepite')
+    delete_user(con, 'pepiti')
+
 
