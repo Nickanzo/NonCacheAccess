@@ -22,8 +22,9 @@ def login(username, password):
     if not con.is_connected():
         print("DB connection error!")
     else:
-        #Search the username/password in the DB
-        if verify_user(con, username):
-            print("Success!")
-        else:
-            print("Username or Password incorrect!")
+        #Search username/password in the DB
+        return verify_user(con, username)
+        # if verify_user(con, username):
+        #     print("Success!")
+        # else:
+        #     print("Username or Password incorrect!")
