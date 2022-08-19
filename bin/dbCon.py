@@ -19,7 +19,11 @@ from urllib.parse import urlparse  # URL handler
 # ---------------------------------------------------------------------------
 # Create and return DB connection using params
 def create_con(host, user, password, db):
-    return mysql.connector.connect(host=host, user=user, password=password, database=db)
+    try:
+        return mysql.connector.connect(host=host, user=user, password=password, database=db)
+    except mysql.connector.Error as e:
+        msg = 'Failed DB connection {0}. Error: {1}'  # Show error message
+        raise DatabaseError(msg)
 
 
 # Close DB Connection
@@ -43,7 +47,7 @@ def create_user(con, user, password):
                 sql = 'INSERT INTO login (username, password) values (%s, %s)'  # Create SQL statement
                 values = (user, password)  # Use params for statement values
                 cursor.execute(sql, values)  # Execute SQL statement
-            except mysql.Error as e:
+            except mysql.connector.Error as e:
                 msg = 'Failed to insert user {0}. Error: {1}'.format(sql, e)  # Show error message
                 raise DatabaseError(msg)
             finally:  # Terminate Cursor
@@ -67,7 +71,7 @@ def delete_user(con, user):
                 sql = 'DELETE FROM login WHERE username = %s'  # Create SQL statement
                 values = (user,)  # Use params for statement values
                 cursor.execute(sql, values)  # Execute SQL statement
-            except mysql.Error as e:
+            except mysql.connector.Error as e:
                 msg = 'Failed to delete user {0}. Error: {1}'.format(sql, e)  # Show error message
                 raise DatabaseError(msg)
             finally:  # Terminate Cursor
@@ -77,6 +81,22 @@ def delete_user(con, user):
 
             con.commit()  # Commit changes to the DB
 
+
+def verify_login(con, user, password):
+    if con.is_connected:
+        cursor = con.cursor()  # Get Cursor
+        try:
+            sql = 'SELECT COUNT(*) FROM login WHERE username = %s AND password = %s'  # Create SQL statement
+            values = (user, password)  # Use params for statement values
+            cursor.execute(sql, values)
+            (rows,) = cursor.fetchone()
+        except mysql.connector.Error as e:
+            msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
+            raise DatabaseError(msg)
+        finally:
+            cursor.close()
+
+        return bool(rows)
 
 # Verify user in DB
 def verify_user(con, user):
@@ -116,7 +136,7 @@ def load_accounts(con, user):
                     web_accounts.append(urlparse(accountURL).netloc)  # Append a new URL
                     web_accounts.append(account)  # Append list of account names
                 domain = urlparse(accountURL).netloc
-        except mysql.Error as e:
+        except mysql.connector.Error as e:
             msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
             raise DatabaseError(msg)
         finally:
@@ -134,7 +154,7 @@ def create_account(con, username, accountLogin, accountPassword, accountName, ac
                   ' accountName, accountURL ) values (%s,%s,%s,%s,%s)'  # Create SQL statement
             values = (username, accountLogin, accountPassword, accountName, accountURL)  # Use params for statement
             cursor.execute(sql, values)
-        except mysql.Error as e:
+        except mysql.connector.Error as e:
             msg = 'Failed to insert account {0}. Error: {1}'.format(sql, e)  # Show error message
             raise DatabaseError(msg)
         finally:
