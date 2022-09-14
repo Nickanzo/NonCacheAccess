@@ -10,6 +10,7 @@
 # Imports
 # ---------------------------------------------------------------------------
 import mysql.connector  # DB Connection
+import settings  # Global Data
 from mysql.connector import DatabaseError  # SQL Error Handler
 from urllib.parse import urlparse  # URL handler
 
@@ -98,6 +99,7 @@ def verify_login(con, user, password):
 
         return bool(rows)
 
+
 # Verify user in DB
 def verify_user(con, user):
     if con.is_connected:
@@ -123,25 +125,26 @@ def verify_user(con, user):
 def load_accounts(con, user):
     account = []  # List for number of accounts
     web_accounts = []  # List for number of websites
+    domain = ''
     if con.is_connected:
         cursor = con.cursor()  # Get Cursor
         try:
             sql = 'SELECT accountName, accountURL FROM accounts WHERE username = %s'  # Create SQL statement
-            values = user  # Use params for statement values
+            values = (user,)  # Use params for statement values
             cursor.execute(sql, values)
-            for accountName, accountURL in cursor:  # Retrieve found values
-                if not domain == urlparse(accountURL).netloc:  # Check last URL
-                    account.append(accountName)  # Append a new Account name
+            for accountName, accountURL in enumerate(cursor):  # Retrieve found values
+                if domain == accountURL:  # Check last URL
+                    account.append(accountName)  # Append
                 else:
-                    web_accounts.append(urlparse(accountURL).netloc)  # Append a new URL
-                    web_accounts.append(account)  # Append list of account names
-                domain = urlparse(accountURL).netloc
+                    web_accounts.append(accountURL)  # Append a new URL
+                    account.append(accountName)  # Append
+                domain = accountURL
         except mysql.connector.Error as e:
             msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
             raise DatabaseError(msg)
         finally:
             cursor.close()
-
+        web_accounts.append(account)
         return web_accounts
 
 
@@ -149,15 +152,65 @@ def load_accounts(con, user):
 def create_account(con, username, accountLogin, accountPassword, accountName, accountURL):
     if con.is_connected:
         cursor = con.cursor()  # Get Cursor
+        if not username == settings.__user__:
+            print('Account creation only permitted for Logged User, please log in and try again')
+            return False
+        elif verify_account(con, settings.__user__, accountLogin, accountURL):
+            print('The account was created already!')
+            return False
+        else:
+            try:
+                sql = 'INSERT INTO accounts ( username, accountLogin, accountPassword,' \
+                      ' accountName, accountURL ) values (%s,%s,%s,%s,%s)'  # Create SQL statement
+                values = (username, accountLogin, accountPassword, accountName, accountURL)  # Use params for statement
+                cursor.execute(sql, values)
+            except mysql.connector.Error as e:
+                msg = 'Failed to insert account {0}. Error: {1}'.format(sql, e)  # Show error message
+                raise DatabaseError(msg)
+            finally:
+                cursor.close()
+            con.commit()  # Commit changes to the DB
+            print('Account created!')
+            return True
+
+
+# Delete account for the Logged user
+def delete_account(con, username, accountLogin, accountURL):
+    if con.is_connected:
+        if not verify_account(con, username, accountLogin, accountURL):
+            print('Account doesn´t exist')
+            return False
+        else:
+            cursor = con.cursor()  # Get Cursor
+            try:
+                # Create SQL statement
+                sql = 'DELETE FROM accounts WHERE username = %s AND accountLogin = %s AND accountURL = %s'
+                values = (username, accountLogin, accountURL)  # Use params for statement values
+                cursor.execute(sql, values)  # Execute SQL statement
+            except mysql.connector.Error as e:
+                msg = 'Failed to delete user {0}. Error: {1}'.format(sql, e)  # Show error message
+                raise DatabaseError(msg)
+            finally:  # Terminate Cursor
+                cursor.close()
+            con.commit()  # Commit changes to the DB
+            print('Account deleted!')  # Success message
+            return True
+
+
+# Verify if the account already exists
+def verify_account(con, username, accountLogin, accountURL):
+    if con.is_connected:
+        cursor = con.cursor()  # Get Cursor
         try:
-            sql = 'INSERT INTO accounts ( username, accountLogin, accountPassword,' \
-                  ' accountName, accountURL ) values (%s,%s,%s,%s,%s)'  # Create SQL statement
-            values = (username, accountLogin, accountPassword, accountName, accountURL)  # Use params for statement
+            # Create SQL statement
+            sql = 'SELECT COUNT(*) FROM accounts WHERE username = %s AND accountLogin = %s AND accountURL = %s'
+            values = (username, accountLogin, accountURL)  # Use params for statement values
             cursor.execute(sql, values)
+            (rows,) = cursor.fetchone()
         except mysql.connector.Error as e:
-            msg = 'Failed to insert account {0}. Error: {1}'.format(sql, e)  # Show error message
+            msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
             raise DatabaseError(msg)
         finally:
             cursor.close()
-        con.commit()  # Commit changes to the DB
-        print('Account created!')
+
+        return bool(rows)

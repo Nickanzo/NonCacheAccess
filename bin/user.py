@@ -13,14 +13,11 @@ from settings import *
 from getpass import getpass, getuser
 from dbCon import load_accounts, create_account
 
-global __user__
-
 
 # Load User info
 def load_user(con, username):
     user_accounts = []
     if con.is_connected:
-        __user__ = username
         user_accounts = load_accounts(con, username)
 
         if not len(user_accounts) > 0:

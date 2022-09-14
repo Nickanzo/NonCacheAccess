@@ -9,12 +9,14 @@
 # ---------------------------------------------------------------------------
 # Imports
 # ---------------------------------------------------------------------------
-from dbCon import create_con, verify_user
-from settings import *
+from bin.dbCon import create_con, verify_login
+import settings  # App Global Data
+from settings import *  # App Global Data
 
 
 # Login method for account management display
 def login(username, password):
+    settings.init()
     # Create DB connection using settings.py definitions
     con = create_con(HOST, USER, PASSWORD, NAME)
 
@@ -23,8 +25,9 @@ def login(username, password):
         print("DB connection error!")
     else:
         #Search username/password in the DB
-        return verify_user(con, username)
-        # if verify_user(con, username):
-        #     print("Success!")
-        # else:
-        #     print("Username or Password incorrect!")
+        if verify_login(con, username, password):
+            settings.__user__ = username
+            return con
+        else:
+            con.close()
+            return con
