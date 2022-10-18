@@ -14,10 +14,6 @@ from bin.dbCon import *  # DB connection
 from settings import *  # App Global info
 
 
-# class MyTestCase(unittest.TestCase):
-#     def test_something(self):
-#         self.assertEqual(True, False)  # add assertion here
-
 if __name__ == '__main__':  # DB main testing
     # |✓| 1st Test, create connection
     con = create_con(HOST, USER, PASSWORD, NAME)

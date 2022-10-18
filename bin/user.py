@@ -29,5 +29,6 @@ def load_user(con, username):
                 accountURL = input('URL: ')
                 create_account(con, username, accountLogin, accountPassword, accountName, accountURL)
         else:
-            for accounts in user_accounts:
-                print(accounts)
+            return user_accounts
+            # for accounts in user_accounts:
+            #     print(accounts)

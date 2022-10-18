@@ -123,7 +123,6 @@ def verify_user(con, user):
 # ---------------------------------------------------------------------------
 # Load all the accounts the user logged has
 def load_accounts(con, user):
-    account = []  # List for number of accounts
     web_accounts = []  # List for number of websites
     domain = ''
     if con.is_connected:
@@ -132,20 +131,35 @@ def load_accounts(con, user):
             sql = 'SELECT accountName, accountURL FROM accounts WHERE username = %s'  # Create SQL statement
             values = (user,)  # Use params for statement values
             cursor.execute(sql, values)
-            for accountName, accountURL in enumerate(cursor):  # Retrieve found values
+            for accountName, accountURL in cursor:  # Retrieve found values
                 if domain == accountURL:  # Check last URL
-                    account.append(accountName)  # Append
+                    web_accounts.append(accountName)  # Append
                 else:
                     web_accounts.append(accountURL)  # Append a new URL
-                    account.append(accountName)  # Append
+                    web_accounts.append(accountName)  # Append
                 domain = accountURL
         except mysql.connector.Error as e:
             msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
             raise DatabaseError(msg)
         finally:
             cursor.close()
-        web_accounts.append(account)
         return web_accounts
+
+
+def retrieve_account(con, accountName):
+    if con.is_connected:
+        cursor = con.cursor()  # Get Cursor
+        try:
+            sql = 'SELECT accountLogin, accountPassword, accountURL FROM accounts WHERE accountName = %s'  # Create SQL statement
+            values = (accountName,)  # Use params for statement values
+            cursor.execute(sql, values)
+            account = cursor.fetchall()
+            return account
+        except mysql.connector.Error as e:
+            msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
+            raise DatabaseError(msg)
+        finally:
+            cursor.close()
 
 
 # Create a new account for the user logged

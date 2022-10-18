@@ -22,6 +22,10 @@ if __name__ == '__main__':
     # |✓| 2nd Test, Create Accounts
     if login:
         print(create_account(logged, settings.__user__, 'pepo@email.com', 'pepo123', 'EmailPepito', 'www.gmail.com'))
+        print(create_account(logged, settings.__user__, 'pepo2@email.com', 'pepo1234', 'EmailPepito2', 'www.gmail.com'))
+        print(create_account(logged, settings.__user__, 'pepo3@email.com', 'pepo1235', 'EmailPepito3', 'www.gmail.com'))
+        print(create_account(logged, settings.__user__, 'pepo4@email.com', 'pepo1236', 'EmailPepito4', 'www.gmail.com'))
+        print(create_account(logged, settings.__user__, 'pepo5@email.com', 'pepo1237', 'EmailPepito5', 'www.gmail.com'))
         print(create_account(logged, settings.__user__, 'pepo@domain.com', 'pepodom', 'DomPepito', 'www.pepito.com'))
 
     # |✓| 3rd Test, Don't allow create Account for different Login
