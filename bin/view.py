@@ -13,20 +13,32 @@ import tkinter
 from settings import MAIN_SIZE
 
 
-# Window initialization
+# Window default constructor
 def create():
     # Main window
     main = tkinter.Tk()
     # Set main window size
-    size(main, MAIN_SIZE)
+    set_size(main, MAIN_SIZE)
+    # Return the new window
+    return main
+
+
+# Window parametrized constructor
+def create(size, title):
+    # Main window
+    main = tkinter.Tk()
+    # Set main window size
+    set_size(main, size)
+    # Set main window title
+    set_title(main, title)
     # Return the new window
     return main
 
 
 # Change window size
-def size(window, size):
+def set_size(window, size):
     window.geometry(size)
 
 
-def title(window, text):
+def set_title(window, text):
     window.title(text)

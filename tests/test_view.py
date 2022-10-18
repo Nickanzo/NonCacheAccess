@@ -11,12 +11,40 @@
 # ---------------------------------------------------------------------------
 from bin.view import *
 
+
 # 1st Screen definition
 def screen_1():
+    # Create main screen
+    scr1 = create()
+    # Login title
+    title = tkinter.Label(scr1, text='Login')
+    title.pack()
+    # Username dummy
+    text_input1 = tkinter.Entry(scr1)
+    text_input1.pack()
+    # Password dummy
+    text_input2 = tkinter.Entry(scr1)
+    text_input2.pack()
+    # Login Button
+    login_button = tkinter.Button(scr1, text='Submit', padx=30, pady=1, command=lambda: check_input(), bg='white')
+    login_button.pack()
+    # Error message
+    msg = tkinter.Label(app)
+    msg.pack()
 
 
 # 2nd Screen definition
 def screen_2():
+    # Create new screen
+    scr2 = create()
+    # Single title
+    msg = tkinter.Label(scr2, text='Welcome!')
+    msg.pack()
+    # Back button
+    back = tkinter.Button(scr2, text='Back', command=lambda: call_scr(1))
+    back.pack()
+
+    scr2.mainloop()
 
 
 # Screen invoker
@@ -29,16 +57,13 @@ def call_scr(scr_num):
         case _:
           print('Fail to load Screen')
 
+
 # Check Screen Input
 def check_input():
     if text_input1.get():
-        msg['text'] = 'Input has been submitted'
-        text_input1.delete(0, len(text_input1.get()))
-        return True
+        call_scr(2)
     else:
         msg['text'] = 'Input is empty'
-
-    return False
 
 
 # Action listener for Window
@@ -85,10 +110,8 @@ if __name__ == '__main__':
     msg = tkinter.Label(app)
     msg.pack()
 
+    # |✓| 6th Test, call 2nd Screen
 
-    # | | 6th Test, call 2nd Screen
-    call_scr(2)
-
-    # | | 7th Test, return to 1st Screen
+    # |✓| 7th Test, return to 1st Screen
 
     app.mainloop()
