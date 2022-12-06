@@ -14,6 +14,7 @@ from bin.dbCon import *  # DB connection
 from settings import *  # App Global info
 
 
+
 if __name__ == '__main__':  # DB main testing
     # |✓| 1st Test, create connection
     con = create_con(HOST, USER, PASSWORD, NAME)
@@ -23,6 +24,24 @@ if __name__ == '__main__':  # DB main testing
         print("DB connection error!")
     else:
         print("DB connection succeeded!")
+
+    password = 'Pepito123'
+
+    key = createKey(password)
+
+    encrypted = encryptPass(password)
+
+    customEncrypted = customEncrypt(key, password)
+
+    print(key)
+
+    print(encrypted)
+
+    print(bcrypt.checkpw(password.encode(), encrypted))
+
+    print(customEncrypted)
+
+    print(customDecrypt(key,customEncrypted))
 
     # |✓| 3rd Test, user creation
     create_user(con, 'pepita', 'pepa123')

@@ -9,9 +9,14 @@
 # ---------------------------------------------------------------------------
 # Imports
 # ---------------------------------------------------------------------------
+import os
+
 import mysql.connector  # DB Connection
 import settings  # Global Data
 from mysql.connector import DatabaseError  # SQL Error Handler
+import hashlib
+import base64
+import bcrypt
 from urllib.parse import urlparse  # URL handler
 
 
@@ -30,6 +35,15 @@ def create_con(host, user, password, db):
 # Close DB Connection
 def close_con(con):
     return con.close()
+
+
+def retrieve_con():
+    try:
+        return mysql.connector.connect(host=settings.HOST, user=settings.USER,
+                                       password=settings.PASSWORD, database=settings.NAME)
+    except mysql.connector.Error as e:
+        msg = 'Failed DB connection {0}. Error: {1}'  # Show error message
+        raise DatabaseError(msg)
 
 
 # ---------------------------------------------------------------------------
@@ -58,6 +72,8 @@ def create_user(con, user, password):
 
             con.commit()  # Commit changes to the DB
 
+            return True
+
 
 # Delete Login user
 def delete_user(con, user):
@@ -83,14 +99,19 @@ def delete_user(con, user):
             con.commit()  # Commit changes to the DB
 
 
-def verify_login(con, user, password):
+def verify_login(con, user, pwd):
     if con.is_connected:
         cursor = con.cursor()  # Get Cursor
         try:
-            sql = 'SELECT COUNT(*) FROM login WHERE username = %s AND password = %s'  # Create SQL statement
-            values = (user, password)  # Use params for statement values
+            sql = 'SELECT username, password FROM login WHERE username = %s'  # Create SQL statement
+            values = (user,)  # Use params for statement values
             cursor.execute(sql, values)
-            (rows,) = cursor.fetchone()
+            for username, password in cursor:
+                if bcrypt.checkpw(pwd.encode("utf-8"), password.encode('utf-8')) and username == user:
+                    return True
+                else:
+                    return False
+            #(rows,) = cursor.fetchone()
         except mysql.connector.Error as e:
             msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
             raise DatabaseError(msg)
@@ -116,6 +137,37 @@ def verify_user(con, user):
             cursor.close()
 
         return bool(rows)
+
+
+def createKey(key):
+
+    encrypted = hashlib.md5(key.encode())
+
+    return encrypted.hexdigest().upper()
+
+
+def encryptPass(key):
+
+    hash = bcrypt.hashpw(key.encode("utf-8"), bcrypt.gensalt())
+
+    return hash
+
+
+def customEncrypt(key, msg):
+    encryped = []
+    for i, c in enumerate(msg):
+        key_c = ord(key[i % len(key)])
+        msg_c = ord(c)
+        encryped.append(chr((msg_c + key_c) % 127))
+    return ''.join(encryped)
+
+def customDecrypt(key, encryped):
+    msg = []
+    for i, c in enumerate(encryped):
+        key_c = ord(key[i % len(key)])
+        enc_c = ord(c)
+        msg.append(chr((enc_c - key_c) % 127))
+    return ''.join(msg)
 
 
 # ---------------------------------------------------------------------------

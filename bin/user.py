@@ -21,14 +21,7 @@ def load_user(con, username):
         user_accounts = load_accounts(con, username)
 
         if not len(user_accounts) > 0:
-            answer = input('User has no accounts, do you want to create one? [Y/N]')
-            if not answer == 'N':
-                accountLogin = getuser('Login: ')
-                accountPassword = getpass('Password: ')
-                accountName = input('Account nickname: ')
-                accountURL = input('URL: ')
-                create_account(con, username, accountLogin, accountPassword, accountName, accountURL)
+            print('No accounts created')
+            return user_accounts
         else:
             return user_accounts
-            # for accounts in user_accounts:
-            #     print(accounts)
