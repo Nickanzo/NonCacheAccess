@@ -35,49 +35,49 @@ label_1 = customtkinter.CTkLabel(text='NonCacheAccess', master=frame_1, justify=
                                  font=customtkinter.CTkFont(size=35, weight="bold"))
 label_1.pack(pady=45, padx=10)
 
-# entry_1 = customtkinter.CTkEntry(master=frame_1, placeholder_text="Username", width=250,
-#                                  font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
-# entry_1.pack(pady=10, padx=10)
-#
-# entry_2 = customtkinter.CTkEntry(master=frame_1, placeholder_text="Password", width=250,
-#                                  font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
-# entry_2.configure(show='*')
-# entry_2.pack(pady=10, padx=10)
-#
-# button_1 = customtkinter.CTkButton(master=frame_1, command=button_callback, text="Login",
-#                                    font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
-# button_1.pack(pady=25, padx=10)
+entry_1 = customtkinter.CTkEntry(master=frame_1, placeholder_text="Username", width=250,
+                                 font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
+entry_1.pack(pady=10, padx=10)
+
+entry_2 = customtkinter.CTkEntry(master=frame_1, placeholder_text="Password", width=250,
+                                 font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
+entry_2.configure(show='*')
+entry_2.pack(pady=10, padx=10)
+
+button_1 = customtkinter.CTkButton(master=frame_1, command=button_callback, text="Login",
+                                   font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
+button_1.pack(pady=25, padx=10)
 
 
 
-# optionmenu_1 = customtkinter.CTkOptionMenu(frame_1, values=["Option 1", "Option 2", "Option 42 long long long..."])
-# optionmenu_1.pack(pady=10, padx=10)
-# optionmenu_1.set("CTkOptionMenu")
+optionmenu_1 = customtkinter.CTkOptionMenu(frame_1, values=["Option 1", "Option 2", "Option 42 long long long..."])
+optionmenu_1.pack(pady=10, padx=10)
+optionmenu_1.set("CTkOptionMenu")
 
-# combobox_1 = customtkinter.CTkComboBox(frame_1, values=["Option 1", "Option 2", "Option 42 long long long..."])
-# combobox_1.pack(pady=10, padx=10)
-# optionmenu_1.set("CTkComboBox")
+combobox_1 = customtkinter.CTkComboBox(frame_1, values=["Option 1", "Option 2", "Option 42 long long long..."])
+combobox_1.pack(pady=10, padx=10)
+optionmenu_1.set("CTkComboBox")
 
-# checkbox_1 = customtkinter.CTkCheckBox(master=frame_1)
-# checkbox_1.pack(pady=10, padx=10)
+checkbox_1 = customtkinter.CTkCheckBox(master=frame_1)
+checkbox_1.pack(pady=10, padx=10)
 
-# radiobutton_var = tkinter.IntVar(value=1)
+radiobutton_var = tkinter.IntVar(value=1)
 
-# radiobutton_1 = customtkinter.CTkRadioButton(master=frame_1, variable=radiobutton_var, value=1)
-# radiobutton_1.pack(pady=10, padx=10)
-#
-# radiobutton_2 = customtkinter.CTkRadioButton(master=frame_1, variable=radiobutton_var, value=2)
-# radiobutton_2.pack(pady=10, padx=10)
+radiobutton_1 = customtkinter.CTkRadioButton(master=frame_1, variable=radiobutton_var, value=1)
+radiobutton_1.pack(pady=10, padx=10)
+
+radiobutton_2 = customtkinter.CTkRadioButton(master=frame_1, variable=radiobutton_var, value=2)
+radiobutton_2.pack(pady=10, padx=10)
 
 switch_1 = customtkinter.CTkSwitch(master=frame_1)
 switch_1.pack(side=tkinter.BOTTOM, anchor="e", padx=8, pady=8)
 
-# text_1 = customtkinter.CTkTextbox(master=frame_1, width=200, height=70)
-# text_1.pack(pady=10, padx=10)
-# text_1.insert("0.0", "CTkTextbox\n\n\n\n")
+text_1 = customtkinter.CTkTextbox(master=frame_1, width=200, height=70)
+text_1.pack(pady=10, padx=10)
+text_1.insert("0.0", "CTkTextbox\n\n\n\n")
 
-# segmented_button_1 = customtkinter.CTkSegmentedButton(master=frame_1, values=["CTkSegmentedButton", "Value 2"])
-# segmented_button_1.pack(pady=10, padx=10)
+segmented_button_1 = customtkinter.CTkSegmentedButton(master=frame_1, values=["CTkSegmentedButton", "Value 2"])
+segmented_button_1.pack(pady=10, padx=10)
 
 tabview_1 = customtkinter.CTkTabview(master=frame_1, width=200, height=70)
 tabview_1.pack(pady=0, padx=10)

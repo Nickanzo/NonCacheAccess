@@ -13,7 +13,7 @@ from tkinter import messagebox
 import customtkinter
 import tkinter
 
-from bin.dbCon import retrieve_account, create_user, retrieve_con, encryptPass, create_account
+from bin.dbCon import retrieve_account, create_user, retrieve_con, encryptPass, create_account, load_websites
 from bin.view import *
 from bin.login import login
 from bin.user import load_user
@@ -32,14 +32,10 @@ def check_login(username, password):
 
 
 def open_link(account, con):
-    account = retrieve_account(con, account)
 
-    for accounts in account:
-        site_login = accounts[0]
-        site_pass = accounts[1]
-        site_url = accounts[2]
+    web_account = retrieve_account(con, account)
 
-    access_account(site_login, site_pass, site_url)
+    access_account(web_account[0], web_account[1], web_account[2], web_account[3])
 
 
 def create_tree(scr, data, con):
@@ -51,22 +47,19 @@ def create_tree(scr, data, con):
     tv.configure(yscroll=ybar.set)
     tv.heading('#0', text='Contas')
 
+    website = load_websites(retrieve_con())
+
     for i, accounts in enumerate(data):
-        if accounts.__contains__("www."):
+        if accounts in website:
             parent = i
             tv.insert('', tkinter.END, text=accounts, iid=i)
         else:
             tv.insert(parent, tkinter.END, text=accounts, iid=i)
             tv.bind('<Double-Button-1>', lambda event: open_link(accounts, con))
 
-        xplace = i + (settings.HEIGHT / 6)
-        yplace = i + (settings.WIDTH / 7)
-
 
     tv.column("#1", width=150)
     tv.grid(row=0, column=0, padx=20, pady=25)
-        #tv.pack(padx=50, pady=25, anchor="w")
-        #tv.place(x=xplace, y=yplace)
 
 
 def new_scr(name):
@@ -111,13 +104,19 @@ def new_tab(scr, width, height):
 def user_scr(con, username):
     main_scr = new_scr("user")
 
-    def user_createAccount(accountLogin, accountPwd, accoountName, accountURL):
+    def user_create_account(accountLogin, accountPwd, accountName, accountURL):
 
         con = retrieve_con()
 
         if con.is_connected():
-            if create_account(con, settings.__user__, accountLogin, accountPwd, accoountName, accountURL):
+            if accountURL == 'Website':
+                addMsg.configure(text="Select a Website!")
+            elif len(accountLogin) == 0 or len(accountPwd) == 0 or len(accountName) == 0:
+                addMsg.configure(text="Fill all the Fields!")
+            elif create_account(con, settings.__user__, accountLogin, accountPwd, accountName, accountURL):
                 addMsg.configure(text="Account created!")
+                main_scr.destroy()
+                user_scr(retrieve_con(), username)
             else:
                 addMsg.configure(text="Account couldn't be created!")
 
@@ -143,10 +142,9 @@ def user_scr(con, username):
     # Accounts  ###
     ###############
 
-    frame = grid_frame(customtkinter.CTkTabview.tab(tab, "Accounts"), 0, 0)
-
     usr_acc = load_user(con, username)
     if len(usr_acc) > 0:
+        frame = grid_frame(customtkinter.CTkTabview.tab(tab, "Accounts"), 0, 0)
         create_tree(frame, usr_acc, con)
 
     ###################
@@ -157,11 +155,15 @@ def user_scr(con, username):
                                          placeholder_text="Account Name", width=250,
                                          font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
     accountName.grid(row=0, column=1, padx=100, pady=(0, 200), sticky="ew")
+    accountName.focus_force()
 
-    accountURL = customtkinter.CTkEntry(master=customtkinter.CTkTabview.tab(tab, "Accounts"),
-                                        placeholder_text="www.domain.com", width=250,
-                                        font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
-    accountURL.grid(row=0, column=1, padx=100, pady=(0, 100), sticky="ew")
+    websites = load_websites(retrieve_con())
+    domain = StringVar(customtkinter.CTkTabview.tab(tab, "Accounts"))
+
+    website = customtkinter.CTkOptionMenu(master=customtkinter.CTkTabview.tab(tab, 'Accounts'),
+                                          values=websites, variable=domain)
+    website.grid(row=0, column=1, padx=100, pady=(0, 100), sticky="ew")
+    website.set("Website")
 
     accountLogin = customtkinter.CTkEntry(master=customtkinter.CTkTabview.tab(tab, "Accounts"),
                                           placeholder_text="Login", width=250,
@@ -175,15 +177,15 @@ def user_scr(con, username):
     accountPwd.grid(row=0, column=1, padx=100, pady=(100, 0), sticky="ew")
 
     addButton = customtkinter.CTkButton(master=customtkinter.CTkTabview.tab(tab, "Accounts"),
-                                        command=lambda: user_createAccount(accountLogin.get(), accountPwd.get(),
-                                                                           accountName.get(), accountURL.get()),
+                                        command=lambda: user_create_account(accountLogin.get(), accountPwd.get(),
+                                                                            accountName.get(), website.get()),
                                         text="Add Account",
                                         font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
     addButton.grid(row=0, column=1, padx=100, pady=(225, 0))
 
     addMsg = customtkinter.CTkLabel(master=customtkinter.CTkTabview.tab(tab, "Accounts"),
                                     justify=tkinter.CENTER, text='')
-    addMsg.grid(row=0, column=1, padx=100, pady=(50, 0))
+    addMsg.grid(row=0, column=1, padx=100, pady=(155, 0))
 
     # Logoff Button
     logoff = customtkinter.CTkButton(master=main_scr, text="Log off", command=user_logoff, width=25, height=25)
@@ -247,7 +249,7 @@ def login_scr():
                                         placeholder_text="Username", width=250,
                                         font=customtkinter.CTkFont(size=16, weight="bold", family="Arial"))
     userLogin.grid(row=0, column=0, padx=20, pady=(20, 10))
-    userLogin.focus_set()
+
 
     passwordLogin = customtkinter.CTkEntry(master=customtkinter.CTkTabview.tab(tabview, "Login"),
                                            placeholder_text="Password", width=250,
@@ -301,6 +303,8 @@ def login_scr():
     # GUI Theme Switch
     switchTheme = customtkinter.CTkSwitch(master=frame, text='', command=lambda: toggleTheme())
     switchTheme.pack(side=tkinter.BOTTOM, anchor="e", padx=0, pady=8)
+
+    tabview.focus_force()
 
     scr_login.mainloop()
 

@@ -205,8 +205,36 @@ def retrieve_account(con, accountName):
             sql = 'SELECT accountLogin, accountPassword, accountURL FROM accounts WHERE accountName = %s'  # Create SQL statement
             values = (accountName,)  # Use params for statement values
             cursor.execute(sql, values)
-            account = cursor.fetchall()
+            result = cursor.fetchone()
+
+            sql = 'SELECT URL, name FROM websites WHERE name = %s'  # Create SQL statement
+            values = (result[2],)
+            cursor.execute(sql, values)
+            result_aux = cursor.fetchone()
+            account = list()
+            account.append(result[0])
+            account.append(result[1])
+            account.append(result_aux[0])
+            account.append(result_aux[1])
+
             return account
+        except mysql.connector.Error as e:
+            msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
+            raise DatabaseError(msg)
+        finally:
+            cursor.close()
+
+
+def load_websites(con):
+    if con.is_connected:
+        cursor = con.cursor()
+        try:
+            sql = 'SELECT name FROM websites'
+            cursor.execute(sql)
+            websites = [r for r, in cursor]
+            #websites = cursor.fetchall()
+            #websites = list(cursor.fetchall())
+            return websites
         except mysql.connector.Error as e:
             msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
             raise DatabaseError(msg)

@@ -9,56 +9,50 @@
 # ---------------------------------------------------------------------------
 # Imports
 # ---------------------------------------------------------------------------
+import time
+
 from selenium import webdriver
-from selenium.webdriver import *
-import requests
-import webbrowser
+from selenium.webdriver.edge.service import Service
+from selenium.webdriver.common.by import By
+from dbCon import load_websites
 import settings
 
+def open_linkedin(srv, url, usr, pwd):
+    browser = webdriver.Edge(service=srv)
 
-def set_browser(browser):
-    match browser:
-        case 'Firefox':
-            web_browser = webdriver.Firefox
-        case 'Chrome':
-            web_browser = webdriver.Chrome
-        case 'Safari':
-            web_browser = webdriver.Safari
-        case _:
-            web_browser = webdriver.Edge
-    settings.__browser__ = web_browser
+    browser.get(url)
+    browser.find_element(by=By.ID, value='email').send_keys(usr)
+    browser.find_element(by=By.ID, value='password').send_keys(pwd)
+    browser.find_element(by=BY, value='js_btn_login').click()
 
+def open_google(srv, url, usr, pwd):
+    browser = webdriver.Edge(service=srv)
 
-def get_browser():
-     browser = webbrowser.get()
-     print(browser.__class__)
-     if browser.__class__ == "":
-        set_browser()
-     else:
-        set_browser(browser.__class__)
+    browser.get(url)
+    browser.find_element(by=By.ID, value='identifierId').send_keys(usr)
+    browser.find_element(by=By.ID, value='identifierNext').click()
+
+    time.sleep(2)
+
+    browser.find_element(by=By.NAME, value='Passwd').send_keys(pwd)
+    browser.find_element(by=By.ID, value='passwordNext').click()
 
 
-def checkURL(url):
-    try:
-        req = requests.get(url)
-        while req.status_code != requests.codes['ok']:
-            return checkURL(input('Please enter a valid url:'))
-    except Exception as ex:
-        print(f'Something went wrong: {ex}')
-        print('Try again!')
-        return checkURL(input('Please enter a valid url:'))
 
-    return url
+def open_facebook(srv, url, usr, pwd):
+    browser = webdriver.Edge(service=srv)
 
+def open_netflix(srv, url, usr, pwd):
+    browser = webdriver.Edge(service=srv)
 
-def access_account(username, password, url):
-    try:
-        if settings.__browser__ == "":
-            get_browser()
-    except AttributeError:
-        print('No WebBrowser found')
-        set_browser('')
+def access_account(username, password, url, web):
 
-    settings.__browser__.get(url)
+    PATH = "..\\webDrivers\\Edge\\msedgedriver.exe"
 
+    service = Service(PATH)
 
+    match web:
+        case 'LinkedIn':
+            open_linkedin(service, url, username, password)
+        case 'Google':
+            open_google(service, url, username, password)
