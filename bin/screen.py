@@ -17,7 +17,6 @@ from bin.dbCon import retrieve_account, create_user, retrieve_con, encryptPass, 
 from bin.view import *
 from bin.login import login
 from bin.user import load_user
-# from settings import HEIGHT, WIDTH, TEXT_FIELDS
 from tkinter import *
 from bin.webBrowser import access_account
 import settings
@@ -31,11 +30,34 @@ def check_login(username, password):
         messagebox.showerror('Login failed!')
 
 
-def open_link(account, con):
+def open_link(tree):
 
-    web_account = retrieve_account(con, account)
+    selected = tree.focus()
+
+    sel_account = tree.item(selected)
+
+    website = sel_account.get("text")
+
+    web_account = retrieve_account(retrieve_con(), website)
 
     access_account(web_account[0], web_account[1], web_account[2], web_account[3])
+
+def delete_account(tree):
+
+    selected = tree.focus()
+
+    sel_account = tree.item(selected)
+
+    answer = messagebox.askyesno(title="Delete",
+                                 message="Do you want to delete this account?")
+
+    if answer:
+        tree.delete(sel_account)
+
+    tree.update()
+
+    #item = sel_account.get("text")
+
 
 
 def create_tree(scr, data, con):
@@ -55,8 +77,8 @@ def create_tree(scr, data, con):
             tv.insert('', tkinter.END, text=accounts, iid=i)
         else:
             tv.insert(parent, tkinter.END, text=accounts, iid=i)
-            tv.bind('<Double-Button-1>', lambda event: open_link(accounts, con))
-
+            tv.bind('<Double-Button-1>', lambda event: open_link(tv))
+            tv.bind('<Button-3>', lambda event: delete_account(tv))
 
     tv.column("#1", width=150)
     tv.grid(row=0, column=0, padx=20, pady=25)
@@ -134,7 +156,6 @@ def user_scr(con, username):
 
     tab = new_tab(main_scr, 1000, 350)
     tab.add("Accounts")
-    #tab.add("Add new Account")
     tab.grid_columnconfigure((0, 1), weight=1)
     tab.pack(padx=25, pady=10)
 

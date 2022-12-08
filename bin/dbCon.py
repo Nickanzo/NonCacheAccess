@@ -14,10 +14,7 @@ import os
 import mysql.connector  # DB Connection
 import settings  # Global Data
 from mysql.connector import DatabaseError  # SQL Error Handler
-import hashlib
-import base64
 import bcrypt
-from urllib.parse import urlparse  # URL handler
 
 
 # ---------------------------------------------------------------------------
@@ -99,6 +96,33 @@ def delete_user(con, user):
             con.commit()  # Commit changes to the DB
 
 
+def retrieve_pwd(login, url):
+    con = retrieve_con()
+    if con.is_connected():
+        cursor = con.cursor()  # Get Cursor
+        try:
+
+            sql = 'SELECT username FROM accounts WHERE accountLogin = %s AND accountURL = %s'
+            values = (login, url)
+            cursor.execute(sql, values)
+            usr = cursor.fetchone()
+
+            #pwd_cursor = con.cursor()
+
+            sql = 'SELECT password FROM login WHERE username = %s'
+            values = (usr[0],)
+            cursor.execute(sql, values)
+            pwd = cursor.fetchone()
+
+            return pwd
+
+        except mysql.connector.Error as e:
+            msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
+            raise DatabaseError(msg)
+        finally:
+            cursor.close()
+
+
 def verify_login(con, user, pwd):
     if con.is_connected:
         cursor = con.cursor()  # Get Cursor
@@ -137,13 +161,6 @@ def verify_user(con, user):
             cursor.close()
 
         return bool(rows)
-
-
-def createKey(key):
-
-    encrypted = hashlib.md5(key.encode())
-
-    return encrypted.hexdigest().upper()
 
 
 def encryptPass(key):
@@ -232,8 +249,6 @@ def load_websites(con):
             sql = 'SELECT name FROM websites'
             cursor.execute(sql)
             websites = [r for r, in cursor]
-            #websites = cursor.fetchall()
-            #websites = list(cursor.fetchall())
             return websites
         except mysql.connector.Error as e:
             msg = 'Failed to execute SQL statement {0}. Error: {1}'.format(sql, e)  # Show error message
@@ -254,9 +269,16 @@ def create_account(con, username, accountLogin, accountPassword, accountName, ac
             return False
         else:
             try:
+                sql = 'SELECT password FROM login WHERE username = %s'
+                values = (username,)
+                cursor.execute(sql, values)
+                pwd = cursor.fetchone()
+
+                encrypted = customEncrypt(pwd[0], accountPassword)
+
                 sql = 'INSERT INTO accounts ( username, accountLogin, accountPassword,' \
                       ' accountName, accountURL ) values (%s,%s,%s,%s,%s)'  # Create SQL statement
-                values = (username, accountLogin, accountPassword, accountName, accountURL)  # Use params for statement
+                values = (username, accountLogin, encrypted, accountName, accountURL)  # Use params for statement
                 cursor.execute(sql, values)
             except mysql.connector.Error as e:
                 msg = 'Failed to insert account {0}. Error: {1}'.format(sql, e)  # Show error message
